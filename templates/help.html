@@ -1,0 +1,30 @@
+{% extends "_app_base.html" %}
+
+{% block title %}Help · PlanningPal{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-8 py-10">
+
+  <h1 class="text-3xl font-semibold tracking-tight">Help</h1>
+  <p class="text-sm text-muted-foreground mt-1 mb-8">Common questions about PlanningPal.</p>
+
+  <div class="space-y-3">
+    {% for q, a in [
+      ("Does PlanningPal submit my application to the council?",
+       "No. PlanningPal never submits anything on your behalf. We produce a compliance report — you sign and submit through the Planning Portal."),
+      ("How current are the council policies?",
+       "Local plans and validation lists are refreshed monthly. Policy updates flagged in the past 30 days are highlighted in your report."),
+      ("Which councils are supported?",
+       "All 300+ UK Local Planning Authorities, with deeper coverage for the 50 highest-volume councils."),
+      ("Is my data shared with the council?",
+       "Never. Your drawings and statements are encrypted at rest and never transmitted to any third party."),
+    ] %}
+    <div class="bg-card border border-border rounded-md p-5">
+      <div class="font-semibold">{{ q }}</div>
+      <p class="text-sm text-muted-foreground mt-2">{{ a }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

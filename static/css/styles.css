@@ -1,0 +1,112 @@
+/* CSS custom properties – also used by JS for SVG gauge colors */
+:root {
+  --color-success: #2D7A5F;
+  --color-warning: #D97706;
+  --color-danger: #B91C1C;
+  --color-border: #E2E4ED;
+  --color-primary: #0f1e3d;
+  --color-success-soft: #DFF0EB;
+  --color-warning-soft: #FEF3C7;
+  --color-danger-soft: #FEE2E2;
+}
+
+/* ── Animations ─────────────────────────────────── */
+@keyframes gauge-fill {
+  from { stroke-dashoffset: 283; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-gauge    { animation: gauge-fill 1.2s ease-out; }
+.animate-fade-in-up { animation: fade-in-up 0.4s ease-out both; }
+.animate-spin     { animation: spin 1s linear infinite; }
+
+.gauge-circle {
+  transition: stroke-dashoffset 1s ease-out, stroke 0.3s;
+}
+
+/* ── Tooltip ─────────────────────────────────────── */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.tooltip-popup {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1f3a;
+  color: #FAFAF7;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  width: 280px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 50;
+  text-align: left;
+  line-height: 1.6;
+  white-space: normal;
+}
+.tooltip-wrapper:hover .tooltip-popup { opacity: 1; }
+
+/* ── Native select arrow ─────────────────────────── */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7194' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px !important;
+}
+
+/* ── Switch / toggle ─────────────────────────────── */
+.pp-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.pp-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.pp-switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: #E2E4ED;
+  transition: background 0.2s;
+}
+.pp-switch input:checked + .pp-switch-track { background: #0f1e3d; }
+.pp-switch-thumb {
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  top: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  pointer-events: none;
+}
+.pp-switch input:checked ~ .pp-switch-thumb { transform: translateX(20px); }
+
+/* ── Dashed upload border hover ──────────────────── */
+.upload-zone:hover { border-color: rgba(15,30,61,.4); background: rgba(238,240,245,.35); }
+
+/* ── Section chevron ─────────────────────────────── */
+.chevron-open  { transform: rotate(180deg); }
+
+/* ── Thin scrollbar ──────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E2E4ED; border-radius: 3px; }

@@ -1,0 +1,126 @@
+{% extends "_base.html" %}
+
+{% block title %}PlanningPal — Submit planning applications right the first time{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-background text-foreground">
+
+  <!-- Header -->
+  <header class="border-b border-border/70">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="{{ url_for('landing') }}" class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-md bg-primary text-primary-foreground grid place-items-center">
+          <i data-lucide="shield-check" class="h-4 w-4"></i>
+        </div>
+        <span class="font-semibold tracking-tight">PlanningPal</span>
+      </a>
+      <nav class="flex items-center gap-2">
+        <a href="{{ url_for('dashboard') }}"
+           class="text-sm text-muted-foreground hover:text-foreground px-3 py-2 transition-colors">
+          Dashboard
+        </a>
+        <a href="{{ url_for('new_check') }}"
+           class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-medium px-4 py-2 hover:opacity-90 transition-opacity">
+          Check My Application
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="max-w-6xl mx-auto px-6 pt-24 pb-20">
+    <div class="max-w-3xl">
+      <span class="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground border border-border rounded-full px-3 py-1 mb-6">
+        <span class="h-1.5 w-1.5 rounded-full bg-success inline-block"></span>
+        Compliance copilot for UK planning
+      </span>
+      <h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-tight text-primary">
+        Submit planning applications right the first time.
+      </h1>
+      <p class="mt-6 text-lg text-muted-foreground max-w-2xl">
+        PlanningPal checks your application against your council's exact rules before you submit.
+        Catch the rejections before the council does.
+      </p>
+      <div class="mt-8 flex items-center gap-3">
+        <a href="{{ url_for('new_check') }}"
+           class="inline-flex items-center gap-2 justify-center rounded-md bg-primary text-primary-foreground font-medium px-6 py-3 text-base hover:opacity-90 transition-opacity">
+          Check My Application
+          <i data-lucide="arrow-right" class="h-4 w-4"></i>
+        </a>
+        <a href="{{ url_for('report', app_id='demo') }}"
+           class="inline-flex items-center justify-center rounded-md text-sm font-medium px-6 py-3 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+          See a sample report
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature cards -->
+  <section class="max-w-6xl mx-auto px-6 pb-20 grid md:grid-cols-3 gap-4">
+    {% for icon, title, body in [
+      ('database',     'Trained on 300+ UK councils',       'Local plan policies, validation checklists, and known officer preferences for every major LPA.'),
+      ('shield-check', '82,000+ historical decisions analysed', 'We learn from real refusals to predict the issues your case officer will flag.'),
+      ('lock',         'GDPR-compliant, never shared',      "Your drawings and statements stay private. We never transmit anything to the council on your behalf."),
+    ] %}
+    <div class="bg-card border border-border rounded-md p-6">
+      <i data-lucide="{{ icon }}" class="h-5 w-5 text-primary"></i>
+      <h3 class="mt-4 font-semibold">{{ title }}</h3>
+      <p class="mt-2 text-sm text-muted-foreground">{{ body }}</p>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- User-type cards -->
+  <section class="max-w-6xl mx-auto px-6 pb-24">
+    <h2 class="text-2xl font-semibold tracking-tight mb-6">Built for the people who actually file applications</h2>
+    <div class="grid md:grid-cols-3 gap-4">
+      {% for icon, role, body in [
+        ('hard-hat',   'Architects',        'Stop chasing council validation queries. Spend the time on design.'),
+        ('building-2', 'Small developers',  'De-risk every site. Know your readiness score before paying the fee.'),
+        ('home',       'Homeowners',        "Understand exactly what your council needs — in plain English."),
+      ] %}
+      <div class="bg-card border border-border rounded-md p-6 flex gap-4">
+        <div class="h-10 w-10 rounded-md bg-secondary text-primary grid place-items-center shrink-0">
+          <i data-lucide="{{ icon }}" class="h-5 w-5"></i>
+        </div>
+        <div>
+          <div class="font-semibold">{{ role }}</div>
+          <p class="text-sm text-muted-foreground mt-1">{{ body }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-border/70 mt-12">
+    <div class="max-w-6xl mx-auto px-6 py-10 grid md:grid-cols-4 gap-8 text-sm">
+      <div>
+        <div class="flex items-center gap-2 font-semibold">
+          <i data-lucide="shield-check" class="h-4 w-4 text-primary"></i>
+          PlanningPal
+        </div>
+        <p class="mt-3 text-muted-foreground">Compliance copilot for UK planning. Built in London.</p>
+      </div>
+      {% for col_h, links in [
+        ('Product', ['Features', 'Pricing', 'Councils covered', 'Changelog']),
+        ('Company', ['About', 'Careers', 'Press', 'Contact']),
+        ('Legal',   ['Privacy', 'Terms', 'GDPR', 'Security']),
+      ] %}
+      <div>
+        <div class="font-medium mb-3">{{ col_h }}</div>
+        <ul class="space-y-2 text-muted-foreground">
+          {% for link in links %}
+          <li><a href="#" class="hover:text-foreground transition-colors">{{ link }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="border-t border-border/70 py-5 text-center text-xs text-muted-foreground">
+      © 2025 PlanningPal Ltd. PlanningPal does not submit applications on your behalf.
+    </div>
+  </footer>
+
+</div>
+{% endblock %}

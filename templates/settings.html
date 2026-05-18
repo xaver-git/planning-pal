@@ -1,0 +1,95 @@
+{% extends "_app_base.html" %}
+
+{% block title %}Settings · PlanningPal{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-8 py-10">
+
+  <h1 class="text-3xl font-semibold tracking-tight">Settings</h1>
+  <p class="text-sm text-muted-foreground mt-1 mb-8">Manage your organisation and defaults.</p>
+
+  <div class="space-y-6">
+
+    <!-- Organisation card -->
+    <div class="bg-card border border-border rounded-md p-6">
+      <h2 class="font-semibold mb-4">Organisation</h2>
+      <div class="space-y-4">
+        <div class="grid gap-2">
+          <label class="text-sm font-medium" for="org-name">Organisation name</label>
+          <input id="org-name" type="text" value="Studio Holland Architects"
+                 class="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-primary/30 transition">
+        </div>
+        <div class="grid gap-2">
+          <label class="text-sm font-medium" for="default-council">Default council</label>
+          <select id="default-council"
+                  class="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-primary/30 transition">
+            {% for c in councils %}
+            <option value="{{ c.name }}" {% if c.name == 'Westminster' %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications card -->
+    <div class="bg-card border border-border rounded-md p-6">
+      <h2 class="font-semibold mb-4">Notifications</h2>
+      <div class="space-y-4">
+
+        <div class="flex items-center justify-between gap-6 py-1">
+          <div>
+            <div class="text-sm font-medium">Email notifications</div>
+            <div class="text-xs text-muted-foreground">Get notified when a check completes.</div>
+          </div>
+          <label class="pp-switch">
+            <input type="checkbox" checked id="email-notifs">
+            <span class="pp-switch-track"></span>
+            <span class="pp-switch-thumb"></span>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-between gap-6 py-1">
+          <div>
+            <div class="text-sm font-medium">Weekly digest</div>
+            <div class="text-xs text-muted-foreground">Summary of policy updates for your councils.</div>
+          </div>
+          <label class="pp-switch">
+            <input type="checkbox" id="weekly-digest">
+            <span class="pp-switch-track"></span>
+            <span class="pp-switch-thumb"></span>
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Save button -->
+    <div class="flex justify-end">
+      <button onclick="saveSettings()"
+              class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground
+                     text-sm font-medium px-4 py-2 hover:opacity-90 transition-opacity">
+        Save changes
+      </button>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function saveSettings() {
+  const btn = event.currentTarget;
+  const orig = btn.textContent;
+  btn.textContent = 'Saved!';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }, 2000);
+}
+</script>
+{% endblock %}

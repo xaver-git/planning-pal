@@ -1,0 +1,158 @@
+{% extends "_app_base.html" %}
+
+{% block title %}New Check · PlanningPal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-8 py-10">
+
+  <!-- Page header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-semibold tracking-tight">New compliance check</h1>
+    <p class="text-sm text-muted-foreground mt-1">Four steps. About 2 minutes.</p>
+  </div>
+
+  <!-- Stepper -->
+  <div id="stepper" class="flex items-center gap-2 mb-8"></div>
+
+  <!-- Loading overlay -->
+  <div id="loading-panel" class="hidden bg-card border border-border rounded-md p-12 text-center">
+    <i data-lucide="loader-2" id="loading-spinner" class="h-8 w-8 mx-auto text-primary animate-spin"></i>
+    <div class="mt-6 font-semibold">Running compliance check</div>
+    <div id="status-text" class="mt-2 text-sm text-muted-foreground font-mono min-h-[1.5rem]"></div>
+    <div id="status-list" class="mt-6 max-w-sm mx-auto space-y-2"></div>
+  </div>
+
+  <!-- Step content -->
+  <div id="step-panel" class="bg-card border border-border rounded-md p-8">
+
+    <!-- Step 1: Project basics -->
+    <div id="step-1" class="step-content">
+      <h2 class="font-semibold text-lg mb-5">Project basics</h2>
+      <div class="grid gap-4">
+        <div class="grid gap-2">
+          <label class="text-sm font-medium text-foreground" for="project-name">Project name</label>
+          <input id="project-name" type="text" value="New rear extension — 22 Pembridge Villas"
+                 class="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition">
+        </div>
+        <div class="grid gap-2">
+          <label class="text-sm font-medium text-foreground" for="app-type">Application type</label>
+          <select id="app-type"
+                  class="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-primary/30 transition">
+            {% for t in application_types %}
+            <option value="{{ t }}" {% if t == 'Householder' %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="grid gap-2">
+          <label class="text-sm font-medium text-foreground" for="site-address">Site address</label>
+          <input id="site-address" type="text" value="22 Pembridge Villas, London W11 3EP"
+                 class="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition">
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Council -->
+    <div id="step-2" class="step-content hidden">
+      <h2 class="font-semibold text-lg mb-5">Local council</h2>
+      <div class="grid gap-2 mb-4">
+        <label class="text-sm font-medium text-foreground" for="council-select">Local Planning Authority</label>
+        <select id="council-select" onchange="updateCouncilInfo()"
+                class="flex w-full rounded-md border border-border bg-background px-3 py-2 text-sm
+                       focus:outline-none focus:ring-2 focus:ring-primary/30 transition">
+          {% for c in councils %}
+          <option value="{{ c.name }}" data-quirk="{{ c.quirk }}"
+                  {% if c.name == 'Westminster' %}selected{% endif %}>
+            {{ c.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="council-info" class="bg-secondary/50 border border-border rounded-md p-4 flex gap-3 animate-fade-in-up">
+        <i data-lucide="info" class="h-4 w-4 mt-0.5 text-primary shrink-0"></i>
+        <div class="text-sm">
+          <div id="council-info-title" class="font-semibold mb-1">Westminster known quirks</div>
+          <p id="council-info-quirk" class="text-muted-foreground">
+            Requires daylight/sunlight (BRE 209) assessments for any extension over 3m on terraced properties.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Documents -->
+    <div id="step-3" class="step-content hidden">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <h2 class="font-semibold text-lg mb-4">Upload documents</h2>
+          <div id="upload-zone" onclick="simulateUpload()"
+               class="upload-zone border-2 border-dashed border-border rounded-md p-10 text-center cursor-pointer transition-all">
+            <i data-lucide="file-up" class="h-8 w-8 mx-auto text-muted-foreground"></i>
+            <div class="mt-3 font-medium">Drop files or click to upload</div>
+            <div class="text-xs text-muted-foreground mt-1">PDF, DWG, JPG · up to 50MB</div>
+          </div>
+          <p class="text-xs text-muted-foreground mt-3">Click once to simulate upload of all documents.</p>
+        </div>
+        <div>
+          <h2 class="font-semibold text-lg mb-4">Expected documents</h2>
+          <ul id="doc-list" class="space-y-2">
+            {% for d in required_docs %}
+            <li class="flex items-center gap-2 text-sm doc-item" data-received="{{ 'true' if d.received else 'false' }}">
+              <span class="h-5 w-5 rounded-full grid place-items-center text-[10px] shrink-0
+                           {{ 'bg-success-soft text-success' if d.received else 'bg-muted text-muted-foreground' }} doc-badge">
+                {% if d.received %}
+                <i data-lucide="check" class="h-3 w-3"></i>
+                {% else %}
+                <span>·</span>
+                {% endif %}
+              </span>
+              <span class="{{ '' if d.received else 'text-muted-foreground' }} doc-label">{{ d.name }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Run -->
+    <div id="step-4" class="step-content hidden text-center py-6">
+      <h2 class="font-semibold text-lg">Ready to run</h2>
+      <p class="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+        We'll check <span id="run-project-name" class="font-medium text-foreground">New rear extension — 22 Pembridge Villas</span>
+        against <span id="run-council-name">Westminster</span>'s rules and historical decisions.
+      </p>
+      <button onclick="runCheck()"
+              class="mt-8 inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground
+                     font-medium px-8 py-3 text-base hover:opacity-90 transition-opacity">
+        Run Compliance Check
+      </button>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="flex justify-between mt-10 pt-6 border-t border-border">
+      <button id="btn-back" onclick="prevStep()"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium px-4 py-2
+                     text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-40"
+              disabled>
+        Back
+      </button>
+      <button id="btn-next" onclick="nextStep()"
+              class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground
+                     text-sm font-medium px-4 py-2 hover:opacity-90 transition-opacity">
+        Continue
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Councils JSON for JS -->
+<script>
+  const COUNCILS_DATA = {{ councils_json | safe }};
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/new.js') }}"></script>
+{% endblock %}

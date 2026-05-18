@@ -1,0 +1,208 @@
+{% extends "_app_base.html" %}
+
+{% block title %}Compliance Report · PlanningPal{% endblock %}
+
+{% block content %}
+
+{% if app_data %}
+  {% set project  = app_data.project %}
+  {% set council  = app_data.council %}
+  {% set app_type = app_data.type %}
+{% else %}
+  {% set project  = 'Application' %}
+  {% set council  = '—' %}
+  {% set app_type = '—' %}
+{% endif %}
+
+<div class="max-w-5xl mx-auto px-8 py-10 pb-32">
+
+  <!-- Back link -->
+  <a href="{{ url_for('dashboard') }}"
+     class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+    <i data-lucide="arrow-left" class="h-4 w-4"></i>
+    Back to applications
+  </a>
+
+  <!-- Header card -->
+  <div class="bg-card border border-border rounded-md p-8 flex flex-col md:flex-row gap-8 items-start mb-6">
+    <div class="flex-1">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="font-mono text-[11px] text-muted-foreground">
+          {{ 'APP-DEMO' if is_demo else app_id.upper() }}
+        </span>
+        <span class="inline-flex items-center rounded-full border border-border text-xs font-medium px-2.5 py-0.5 text-muted-foreground">
+          {{ app_type }}
+        </span>
+      </div>
+      <h1 class="text-3xl font-semibold tracking-tight">{{ project }}</h1>
+      <div class="text-sm text-muted-foreground mt-2">{{ council }} City Council · checked just now</div>
+      <div id="verdict-badge" class="mt-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium"></div>
+    </div>
+
+    <!-- Score gauge -->
+    <div class="relative w-[140px] h-[140px] shrink-0">
+      <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="#E2E4ED" stroke-width="8"/>
+        <circle id="gauge-circle" cx="50" cy="50" r="45" fill="none"
+                stroke="#2D7A5F" stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="282.7" stroke-dashoffset="282.7"
+                class="gauge-circle animate-gauge"/>
+      </svg>
+      <div class="absolute inset-0 grid place-items-center">
+        <div class="text-center">
+          <div id="gauge-score" class="text-3xl font-bold">{{ score }}</div>
+          <div class="text-[10px] uppercase tracking-wider text-muted-foreground">Readiness</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sections -->
+  <div class="space-y-4">
+
+    <!-- Blocking issues (cards rendered by JS) -->
+    <div class="bg-card border border-border rounded-md overflow-hidden">
+      <button onclick="toggleSection('blocking')"
+              class="w-full px-6 py-4 flex items-center gap-4 hover:bg-secondary/30 transition text-left">
+        <i data-lucide="alert-octagon" class="h-5 w-5 text-danger shrink-0"></i>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold">Blocking issues</span>
+            <span id="blocking-count" class="text-xs font-mono px-2 py-0.5 rounded bg-danger-soft text-danger">{{ blocking|length }}</span>
+          </div>
+          <div class="text-xs text-muted-foreground mt-0.5">Must fix — likely cause of rejection</div>
+        </div>
+        <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground transition-transform" id="chevron-blocking"></i>
+      </button>
+      <div id="body-blocking" class="px-6 pb-6 pt-2 space-y-3 animate-fade-in-up">
+        {% if not blocking %}
+        <div class="text-sm text-muted-foreground py-4">No blocking issues. Nice.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Warnings (cards rendered by JS) -->
+    <div class="bg-card border border-border rounded-md overflow-hidden">
+      <button onclick="toggleSection('warnings')"
+              class="w-full px-6 py-4 flex items-center gap-4 hover:bg-secondary/30 transition text-left">
+        <i data-lucide="alert-triangle" class="h-5 w-5 text-warning shrink-0"></i>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold">Warnings</span>
+            <span id="warnings-count" class="text-xs font-mono px-2 py-0.5 rounded bg-warning-soft text-warning">{{ warnings|length }}</span>
+          </div>
+          <div class="text-xs text-muted-foreground mt-0.5">Should review — likely officer queries</div>
+        </div>
+        <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground transition-transform" id="chevron-warnings"></i>
+      </button>
+      <div id="body-warnings" class="px-6 pb-6 pt-2 space-y-3 animate-fade-in-up"></div>
+    </div>
+
+    <!-- Compliant items -->
+    <div class="bg-card border border-border rounded-md overflow-hidden">
+      <button onclick="toggleSection('compliant')"
+              class="w-full px-6 py-4 flex items-center gap-4 hover:bg-secondary/30 transition text-left">
+        <i data-lucide="check-circle-2" class="h-5 w-5 text-success shrink-0"></i>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold">Compliant items</span>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-success-soft text-success">{{ compliant|length }}</span>
+          </div>
+          <div class="text-xs text-muted-foreground mt-0.5">Verified against council rules</div>
+        </div>
+        <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground transition-transform" id="chevron-compliant"></i>
+      </button>
+      <div id="body-compliant" class="hidden px-6 pb-6 pt-2 animate-fade-in-up">
+        <ul class="divide-y divide-border">
+          {% for c in compliant %}
+          <li class="py-3 flex items-center gap-3 text-sm">
+            <i data-lucide="check" class="h-4 w-4 text-success shrink-0"></i>
+            <span class="flex-1">{{ c.title }}</span>
+            <span class="tooltip-wrapper">
+              <button class="font-mono text-xs text-primary hover:underline decoration-dotted underline-offset-2">
+                {{ c.policyRef }} · {{ c.policyTitle }}
+              </button>
+              <div class="tooltip-popup">
+                <div class="font-semibold mb-1">{{ c.policyTitle }}</div>
+                <p>{{ c.policyExcerpt or 'Verified against council requirements.' }}</p>
+              </div>
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Document checklist -->
+    <div class="bg-card border border-border rounded-md overflow-hidden">
+      <button onclick="toggleSection('docs')"
+              class="w-full px-6 py-4 flex items-center gap-4 hover:bg-secondary/30 transition text-left">
+        <i data-lucide="file-text" class="h-5 w-5 text-primary shrink-0"></i>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold">Document checklist</span>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-secondary text-secondary-foreground">{{ required_docs|length }}</span>
+          </div>
+          <div class="text-xs text-muted-foreground mt-0.5">Required documents for this council</div>
+        </div>
+        <i data-lucide="chevron-down" class="h-4 w-4 text-muted-foreground transition-transform" id="chevron-docs"></i>
+      </button>
+      <div id="body-docs" class="hidden px-6 pb-6 pt-2 animate-fade-in-up">
+        <ul class="grid md:grid-cols-2 gap-2">
+          {% for d in required_docs %}
+          <li class="flex items-center gap-2 text-sm py-1.5">
+            <span class="h-5 w-5 rounded-full grid place-items-center shrink-0
+                         {{ 'bg-success-soft text-success' if d.received else 'bg-danger-soft text-danger' }}">
+              {% if d.received %}
+              <i data-lucide="check" class="h-3 w-3"></i>
+              {% else %}
+              <i data-lucide="x" class="h-3 w-3"></i>
+              {% endif %}
+            </span>
+            <span class="{{ 'text-danger' if not d.received else '' }}">{{ d.name }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Sticky footer -->
+<div class="fixed bottom-0 left-0 md:left-60 right-0 bg-white/95 backdrop-blur border-t border-border z-30">
+  <div class="max-w-5xl mx-auto px-8 py-4 flex items-center justify-between gap-4">
+    <div class="text-sm">
+      <span id="addressed-count" class="font-semibold text-foreground">0</span>
+      <span class="text-muted-foreground"> of </span>
+      <span id="total-count" class="font-semibold text-foreground">{{ (blocking|length) + (warnings|length) }}</span>
+      <span class="text-muted-foreground"> issues addressed</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="window.print()"
+              class="inline-flex items-center justify-center rounded-md text-sm font-medium px-3 py-1.5
+                     text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
+        Export PDF
+      </button>
+      <button onclick="rerunCheck()"
+              class="inline-flex items-center gap-2 justify-center rounded-md bg-primary text-primary-foreground
+                     text-sm font-medium px-4 py-2 hover:opacity-90 transition-opacity">
+        <i data-lucide="rotate-cw" class="h-4 w-4"></i>
+        Re-run check
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Data for JS -->
+<script>
+  const ISSUES_DATA   = {{ issues_json | safe }};
+  const INITIAL_SCORE = {{ score }};
+  const IS_DEMO       = {{ 'true' if is_demo else 'false' }};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/report.js') }}"></script>
+{% endblock %}

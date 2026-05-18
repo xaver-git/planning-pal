@@ -1,0 +1,70 @@
+{% extends "_app_base.html" %}
+
+{% block title %}Applications · PlanningPal{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-8 py-10">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-semibold tracking-tight">Applications</h1>
+      <p class="text-sm text-muted-foreground mt-1">Past compliance checks across your projects.</p>
+    </div>
+    <a href="{{ url_for('new_check') }}"
+       class="inline-flex items-center gap-2 justify-center rounded-md bg-primary text-primary-foreground font-medium px-5 py-2.5 text-sm hover:opacity-90 transition-opacity">
+      <i data-lucide="plus" class="h-4 w-4"></i>
+      New Application Check
+    </a>
+  </div>
+
+  <!-- Application list -->
+  <div class="grid gap-3">
+    {% for a in applications %}
+      {% if a.score >= 85 %}
+        {% set score_cls = 'text-success' %}
+      {% elif a.score >= 70 %}
+        {% set score_cls = 'text-warning' %}
+      {% else %}
+        {% set score_cls = 'text-danger' %}
+      {% endif %}
+
+    <a href="{{ url_for('report', app_id=a.id) }}"
+       class="group bg-card border border-border rounded-md p-5 flex items-center gap-6
+              hover:border-primary/40 hover:shadow-sm transition-all">
+
+      <!-- Left: metadata -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="font-mono text-[11px] text-muted-foreground">{{ a.id.upper() }}</span>
+          {% if a.status == 'Submitted' %}
+          <span class="inline-flex items-center rounded-full bg-secondary text-secondary-foreground text-xs font-medium px-2.5 py-0.5">
+            {{ a.status }}
+          </span>
+          {% else %}
+          <span class="inline-flex items-center rounded-full border border-border text-xs font-medium px-2.5 py-0.5 text-muted-foreground">
+            {{ a.status }}
+          </span>
+          {% endif %}
+        </div>
+        <div class="font-semibold truncate">{{ a.project }}</div>
+        <div class="text-sm text-muted-foreground mt-1">
+          {{ a.council }} · {{ a.type }} · checked {{ a.date }}
+        </div>
+      </div>
+
+      <!-- Right: score -->
+      <div class="text-right shrink-0">
+        <div class="text-xs text-muted-foreground uppercase tracking-wide">Readiness</div>
+        <div class="text-3xl font-bold {{ score_cls }}">
+          {{ a.score }}<span class="text-base text-muted-foreground font-normal">/100</span>
+        </div>
+      </div>
+
+      <i data-lucide="arrow-right" class="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0"></i>
+    </a>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
